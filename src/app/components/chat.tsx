@@ -4,11 +4,18 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useChat } from "ai/react"
 import { useRef, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
+
 
 export function Chat() {
+    const searchParams = useSearchParams()
+    const token = searchParams.get('token')
 
     const { messages, input, handleInputChange, handleSubmit, setMessages } = useChat({
         api: 'api/ex2',
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
         onError: (e) => {
             console.log(e)
         }

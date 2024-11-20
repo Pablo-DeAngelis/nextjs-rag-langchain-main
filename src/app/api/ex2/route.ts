@@ -9,58 +9,57 @@ import { HttpResponseOutputParser } from 'langchain/output_parsers';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Basic memory formatter that stringifies and passes
- * message history directly into the model.
- */
+// Variable to accumulate conversation history
+let conversationHistory = '';
+
+// Variable to store questions and answers
+let qaHistory: { question: string, answer: string }[] = [];
+
 const formatMessage = (message: VercelChatMessage) => {
     return `${message.role}: ${message.content}`;
 };
 
-async function getQuestions() {
-    const response = await fetch("https://ia-workout-api.fly.dev/api/questions");
-    const data = await response.json();
-    return data.questions.map((q: any) => q.question);
-}
-
 export async function POST(req: Request) {
     try {
-        // Fetch questions from the external service
-       //// const questions = await getQuestions();
+        // Extract the token from the headers
+        const token = req.headers.get('Authorization')?.replace('Bearer ', '');
 
-       const TEMPLATE = `
-       You are a wizard that generates training routines. Ask the user these questions before creating the routine:
-       - Age
-       - Weight
-       - Current training level
-       - How many days they plan to train
-       - Time per session
-       - Training goals
-       
-       Once you have all the necessary information, create a routine in JSON format with this structure:
-       
-       The routine should contain an array of days, where each day has:
-       - A "day" field with the day number and focus of the workout.
-       - An "exercises" field which is an array of exercises. Each exercise includes:
-           - "name": the name of the exercise.
-           - "sets": number of sets.
-           - "duration_or_reps": duration or number of repetitions.
-           - "rpe": rating of perceived exertion (RPE).
-       
-       Only provide the routine in this JSON format without any additional explanation.
-       
-       Current conversation:
-       {chat_history}
-       
-       user: {input}
-       assistant:
-       `;
+        // Log the token for verification
+        console.log("Received Token:", token);
 
+        const TEMPLATE = `
+        You are a coach that collects information to create a training routine for the user. Ask the user the following questions one at a time and wait for their answer before proceeding to the next question:
+        - Age
+        - Weight
+        - Current training level (with options)
+        - How many days they plan to train
+        - Time per session
+        - Training goals (with options)
+        
+        Once you have all the answers, respond only with:
+        "Muchas gracias, vamos a generarte la rutina."
+        
+        Current conversation:
+        {chat_history}
+        
+        user: {input}
+        assistant:
+        `;
 
         // Extract `messages` from the request body
         const { messages } = await req.json();
-        const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
+        const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage).join('\n');
         const currentMessageContent = messages.at(-1).content;
+
+        // Append messages to conversation history
+        conversationHistory += `$bot: ${formattedPreviousMessages} \n`;
+
+        // Store questions and answers
+        messages.slice(0, -1).forEach((message, index) => {
+            if (index % 2 === 0) {
+                qaHistory.push({ question: message.content, answer: messages[index + 1]?.content || '' });
+            }
+        });
 
         const prompt = PromptTemplate.fromTemplate(TEMPLATE);
 
@@ -77,13 +76,44 @@ export async function POST(req: Request) {
 
         // Generate the response
         const stream = await chain.stream({
-            chat_history: formattedPreviousMessages.join('\n'),
+            chat_history: formattedPreviousMessages,
             input: currentMessageContent,
         });
-
-        return new StreamingTextResponse(
+        
+        const finalResponse = new StreamingTextResponse(
             stream.pipeThrough(createStreamDataTransformer()),
         );
+
+
+        const uniqueQAHistory = qaHistory.filter((value, index, self) =>
+            index === self.findIndex((t) => (
+              t.question === value.question && t.answer === value.answer
+            ))
+          );
+
+        const uniqueQAHistoryJson = JSON.stringify(uniqueQAHistory, null, 2);
+
+        // Log QA History for debugging
+        console.log("QA History:\n", uniqueQAHistoryJson);
+
+        // Check if the response is the thank you message
+        if (formattedPreviousMessages.includes("Muchas gracias, vamos a generarte la rutina.")) {
+            // Perform POST request to the external service
+            const response = await fetch("https://ia-workout-api.fly.dev/api/answers", {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: uniqueQAHistoryJson
+            });
+
+            // Log the response from the external service
+            const responseData = await response.json();
+            console.log("Response from external service:", responseData);
+        }
+
+        return finalResponse;
 
     } catch (e: any) {
         return Response.json({ error: e.message }, { status: e.status ?? 500 });
