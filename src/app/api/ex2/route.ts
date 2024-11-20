@@ -47,15 +47,15 @@ export async function POST(req: Request) {
         `;
 
         // Extract `messages` from the request body
-        const { messages } = await req.json();
+        const { messages }: { messages: VercelChatMessage[] } = await req.json();
         const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage).join('\n');
-        const currentMessageContent = messages.at(-1).content;
+        const currentMessageContent = messages.at(-1)?.content || '';
 
         // Append messages to conversation history
         conversationHistory += `$bot: ${formattedPreviousMessages} \n`;
 
         // Store questions and answers
-        messages.slice(0, -1).forEach((message, index) => {
+        messages.slice(0, -1).forEach((message: VercelChatMessage, index: number) => {
             if (index % 2 === 0) {
                 qaHistory.push({ question: message.content, answer: messages[index + 1]?.content || '' });
             }
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
         console.log("QA History:\n", uniqueQAHistoryJson);
 
         // Check if the response is the thank you message
-        if (formattedPreviousMessages.includes("Muchas gracias, vamos a generarte la rutina.")) {
+        if (formattedPreviousMessages.includes("¿Cuáles son tus objetivos de entrenamiento?")) {
             // Perform POST request to the external service
             const response = await fetch("https://ia-workout-api.fly.dev/api/answers", {
                 method: 'POST',

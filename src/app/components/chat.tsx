@@ -31,7 +31,7 @@ export function Chat() {
 
         // Agrega el primer mensaje del bot
         setMessages([
-            { id: 'bot-1', role: 'bot', content: 'Hola, soy un asistente de entrenamiento que necesita conocerte para armar la rutina. Primero necesito preguntarte cual es tu edad?' },
+            { id: 'bot-1', role: 'assistant', content: 'Hola, soy un asistente de entrenamiento que necesita conocerte para armar la rutina. Primero necesito preguntarte cual es tu edad?' },
             ...messages
         ])
     }, [])
