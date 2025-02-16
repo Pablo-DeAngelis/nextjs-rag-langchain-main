@@ -29,20 +29,58 @@ export async function POST(req: Request) {
 
         const TEMPLATE = `
         You are a coach that collects information to create a training routine for the user. Ask the user the following questions one at a time and wait for their answer before proceeding to the next question:
-        - Age
-        - Weight
-        - Current training level (with options)
-        - How many days they plan to train
-        - Time per session
-        - Training goals (with options)
         
-        Once you have all the answers, respond only with:
-        "Muchas gracias, vamos a generarte la rutina."
+        1. **Fitness Level:**  
+           What is your fitness level? (Beginner, Intermediate, Advanced)  
         
-        Current conversation:
-        {chat_history}
+        2. **Goal:**  
+           What is your main goal for training? (e.g., Improve athletic performance, build strength, increase endurance, lose weight, enhance speed, etc.)  
         
-        user: {input}
+        3. **Sport Focus (If Applicable):**  
+           What sport do you train for, if any? (e.g., basketball, football, soccer, etc.)  
+           (If no specific sport, we can focus on general fitness goals.)  
+        
+        4. **Workout Frequency:**  
+           How many days per week do you want to train?  
+        
+        5. **Session Duration:**  
+           How long do you want each training session to be? (in minutes)  
+        
+        6. **Routine Focus:**  
+           On which type of training do you want to focus? (e.g., Strength, Conditioning, Explosiveness, Speed, Endurance, Hypertrophy, Power, Agility, etc.)  
+        
+        7. **Equipment:**  
+           What equipment do you have access to? (e.g., gym, dumbbells, barbells, resistance bands, cones, agility ladder, etc.)  
+        
+        8. **Gym Days (If Applicable):**  
+           How many days per week will you train at the gym?  
+        
+        9. **Sport-Specific Days (If Applicable):**  
+           How many days per week will you do sport-specific drills or conditioning? (e.g., on a pitch, track, or other sport-related drills)  
+        
+        10. **Specific Gym Focus (If Applicable):**  
+            On gym days, would you like to focus on any of the following?  
+            (You can select multiple: Strength, Power, Explosiveness, Endurance, Hypertrophy, Mobility, Agility, Core Strength, etc.)  
+        
+        11. **Rest Periods:**  
+            What is your preferred rest period between sets? (e.g., 30 seconds, 60 seconds, 90 seconds, etc.)  
+        
+        12. **Training Environment (Location):**  
+            What type of environment will you mostly train in? (e.g., gym, home gym, outdoor, football pitch, track, etc.)  
+        
+        13. **Injury History:**  
+            Do you have any past injuries or current injuries that should be considered?  
+        
+        14. **Other Considerations:**  
+            And lastly, do you have any other preferences or considerations you'd like to share for your training program? (e.g., focus on mobility, stress management, muscle groups, etc.)  
+        
+        Once you have all the answers, respond only with:  
+        "Thank you very much! We’re going to generate your workout routine."  
+        
+        Current conversation:  
+        {chat_history}  
+        
+        user: {input}  
         assistant:
         `;
 
@@ -96,22 +134,22 @@ export async function POST(req: Request) {
         // Log QA History for debugging
         console.log("QA History:\n", uniqueQAHistoryJson);
 
-        // Check if the response is the thank you message
-        if (formattedPreviousMessages.includes("¿Cuáles son tus objetivos de entrenamiento?")) {
-            // Perform POST request to the external service
-            const response = await fetch("https://ia-workout-api.fly.dev/api/answers", {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: uniqueQAHistoryJson
-            });
+// Check if the response is the thank you message
+if (formattedPreviousMessages.includes("And lastly") || formattedPreviousMessages.includes("por ultimo")) {
+    // Perform POST request to the external service
+    const response = await fetch("https://ia-workout-api.fly.dev/api/answers", {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: uniqueQAHistoryJson
+    });
 
-            // Log the response from the external service
-            const responseData = await response.json();
-            console.log("Response from external service:", responseData);
-        }
+    // Log the response from the external service
+    const responseData = await response.json();
+    console.log("Response from external service:", responseData);
+}
 
         return finalResponse;
 
