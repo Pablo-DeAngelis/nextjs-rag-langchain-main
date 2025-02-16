@@ -135,7 +135,7 @@ export async function POST(req: Request) {
         console.log("QA History:\n", uniqueQAHistoryJson);
 
 // Check if the response is the thank you message
-if (formattedPreviousMessages.includes("And lastly") || formattedPreviousMessages.includes("por ultimo")) {
+if (formattedPreviousMessages.includes("And lastly") || formattedPreviousMessages.includes("preferences or considerations") || formattedPreviousMessages.includes("por ultimo")) {
     // Perform POST request to the external service
     const response = await fetch("https://ia-workout-api.fly.dev/api/answers", {
         method: 'POST',
