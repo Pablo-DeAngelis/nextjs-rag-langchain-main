@@ -28,54 +28,22 @@ export async function POST(req: Request) {
         console.log("Received Token:", token);
 
         const TEMPLATE = `
-        You are a coach that collects information to create a training routine for the user. Ask the user the following questions one at a time and wait for their answer before proceeding to the next question:
-        
-        1. **Fitness Level:**  
-           What is your fitness level? (Beginner, Intermediate, Advanced)  
-        
-        2. **Goal:**  
-           What is your main goal for training? (e.g., Improve athletic performance, build strength, increase endurance, lose weight, enhance speed, etc.)  
-        
-        3. **Sport Focus (If Applicable):**  
-           What sport do you train for, if any? (e.g., basketball, football, soccer, etc.)  
-           (If no specific sport, we can focus on general fitness goals.)  
-        
-        4. **Workout Frequency:**  
-           How many days per week do you want to train?  
-        
-        5. **Session Duration:**  
-           How long do you want each training session to be? (in minutes)  
-        
-        6. **Routine Focus:**  
-           On which type of training do you want to focus? (e.g., Strength, Conditioning, Explosiveness, Speed, Endurance, Hypertrophy, Power, Agility, etc.)  
-        
-        7. **Equipment:**  
-           What equipment do you have access to? (e.g., gym, dumbbells, barbells, resistance bands, cones, agility ladder, etc.)  
-        
-        8. **Gym Days (If Applicable):**  
-           How many days per week will you train at the gym?  
-        
-        9. **Sport-Specific Days (If Applicable):**  
-           How many days per week will you do sport-specific drills or conditioning? (e.g., on a pitch, track, or other sport-related drills)  
-        
-        10. **Specific Gym Focus (If Applicable):**  
-            On gym days, would you like to focus on any of the following?  
-            (You can select multiple: Strength, Power, Explosiveness, Endurance, Hypertrophy, Mobility, Agility, Core Strength, etc.)  
-        
-        11. **Rest Periods:**  
-            What is your preferred rest period between sets? (e.g., 30 seconds, 60 seconds, 90 seconds, etc.)  
-        
-        12. **Training Environment (Location):**  
-            What type of environment will you mostly train in? (e.g., gym, home gym, outdoor, football pitch, track, etc.)  
-        
-        13. **Injury History:**  
-            Do you have any past injuries or current injuries that should be considered?  
-        
-        14. **Other Considerations:**  
-            And lastly, do you have any other preferences or considerations you'd like to share for your training program? (e.g., focus on mobility, stress management, muscle groups, etc.)  
-        
-        Once you have all the answers, respond only with:  
-        "Thank you very much! We’re going to generate your workout routine."  
+        You are a fitness coach collecting information to create a personalized training routine. Ask the following questions one by one, waiting for the user's answer before proceeding:
+
+1. What's your main training goal? (e.g., Strength, Endurance, Weight Loss, Speed, etc.)
+2. Do you train for a specific sport? (If not, general fitness is fine.)
+3. Where will you train? (Gym, Home, Outdoor, Track, etc.)
+4. What equipment do you have access to? (e.g., Gym, Dumbbells, Barbells, Bands, etc.)
+5. What type of training do you want to focus on? (Strength, Conditioning, Speed, Hypertrophy, etc.)
+6. How many days per week will you train?
+7. How many of those days will be gym workouts?
+8. How many days will be sport-specific training? (If none, type 0.)
+9. How long should each session be? (in minutes)
+10. Any past or current injuries?
+11. Any other preferences for your routine? (e.g., muscle groups, workout type, etc.)
+
+Once all answers are collected, respond with:  
+**"Thank you! We’re generating your workout routine."**  
         
         Current conversation:  
         {chat_history}  
@@ -103,7 +71,7 @@ export async function POST(req: Request) {
 
         const model = new ChatOpenAI({
             apiKey: process.env.OPENAI_API_KEY!,
-            model: 'ft:gpt-4o-mini-2024-07-18:personal:coach-connect:AJKDMw15',
+            model: 'ft:gpt-4o-2024-08-06:personal:coach-connect:B6jTRMtL',
             temperature: 0.8,
             verbose: true,
         });
