@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 11. Any other preferences for your routine? (e.g., muscle groups, workout type, etc.)
 
 Once all answers are collected, respond with:  
-**"Thank you! We’re generating your workout routine."**  
+"Thank you! We’re generating your workout routine."  
         
         Current conversation:  
         {chat_history}  
@@ -102,8 +102,8 @@ Once all answers are collected, respond with:
         // Log QA History for debugging
         console.log("QA History:\n", uniqueQAHistoryJson);
 
-// Check if the response is the thank you message
-if (formattedPreviousMessages.includes("And lastly") || formattedPreviousMessages.includes("preferences or considerations") || formattedPreviousMessages.includes("por ultimo")) {
+
+        if (formattedPreviousMessages.includes("And lastly") || formattedPreviousMessages.includes("preferences for your routine") || formattedPreviousMessages.includes("por ultimo")) {
     // Perform POST request to the external service
     const response = await fetch("https://ia-workout-api.fly.dev/api/answers", {
         method: 'POST',

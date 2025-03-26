@@ -27,7 +27,9 @@ export function Chat() {
         if (domNode) {
             domNode.scrollTop = domNode.scrollHeight;
         }
+    }, [messages]); // Se ejecuta cada vez que cambia el estado de los mensajes
 
+    useEffect(() => {
         setMessages([
             { id: "bot-1", role: "assistant", content: "Hello! I’m a training assistant. What is your fitness level? (Beginner, Intermediate, Advanced)" },
             ...messages,
@@ -42,8 +44,9 @@ export function Chat() {
                 <h1 className="text-2xl font-bold text-gray-800">COACH CONNECT</h1>
             </section>
 
-            <section className="flex flex-col flex-grow max-w-3xl mx-auto px-4">
-                <ul ref={chatParent} className="flex-grow overflow-y-auto space-y-4">
+            {/* Ajustamos el alto y agregamos overflow para que el fondo no se pierda */}
+            <section className="flex flex-col flex-grow max-w-3xl mx-auto px-4 h-[70vh]">
+                <ul ref={chatParent} className="flex-grow overflow-y-auto space-y-4 p-4">
                     {messages.map((m, index) => (
                         <li key={index} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                             <div className={`p-4 rounded-xl shadow-md max-w-[75%] ${m.role === "user" ? "bg-purple-500 text-white" : "bg-white text-gray-900"}`}>
