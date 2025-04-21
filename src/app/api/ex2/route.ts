@@ -27,7 +27,6 @@ You are a fitness coach collecting information to create a personalized training
 What's your main training goal?
 Do you train for a specific sport? (If not, general fitness is fine.)
 What equipment do you have access to? (If you just go to the gym, input gym. If you train outside the gym as well, list the equipment you have e.g. dumbbells, rope, agility ladder.)
-What equipment do you have access to? (e.g., Gym, Dumbbells, Barbells, Bands, etc.)
 What type of training do you want to focus on? (Strength, Conditioning, Speed, Hypertrophy, etc.)
 How many days per week will you train?
 How many of those days will be gym workouts?
@@ -62,7 +61,7 @@ assistant:
 
         const model = new ChatOpenAI({
             apiKey: process.env.OPENAI_API_KEY!,
-            model: 'ft:gpt-4o-2024-08-06:personal:coach-connect:B6jTRMtL',
+            model: 'ft:gpt-4.1-mini-2025-04-14:personal:coach-connect:BOZ5t36c',
             temperature: 0.8,
             verbose: true,
         });
