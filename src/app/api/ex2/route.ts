@@ -82,9 +82,9 @@ assistant:
             stream.pipeThrough(createStreamDataTransformer()),
         );
 
-function removeEmojis(text) {
+const removeEmojis = (text: string) => {
     return text.replace(/[^\x00-\x7F]/g, '');
-  }
+};
   
   const cleanedQAHistory = qaHistory.map(({ question, answer }) => ({
     question: removeEmojis(question),
