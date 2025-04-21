@@ -57,7 +57,7 @@ export function Chat() {
                 id: "bot-1",
                 role: "assistant",
                 content:
-                    "Hello! I’m a training assistant. What is your fitness level? (Beginner, Intermediate, Advanced)",
+                    "Hi! I’m CoachConnect — your personal AI fitness coach. I’m here to help you reach your goals with a training routine tailored just for you. 💪\n\nTo get started, I’ll ask you a few quick questions to understand your training style and preferences.\n\nWhat is your fitness level? (beginner, intermediate, advanced, elite)",
             },
             ...messages,
         ]);
@@ -65,12 +65,6 @@ export function Chat() {
 
     return (
         <main className="flex flex-col w-full h-[100dvh] bg-gray-100">
-
-            {/* Removimos el título */}
-            {/* <section className="text-center py-4">
-                <h2 className="text-purple-600 font-semibold text-sm"></h2>
-                <h1 className="text-2xl font-bold text-gray-800">COACH CONNECT</h1>
-            </section> */}
 
             <section className="flex flex-col flex-grow max-w-3xl mx-auto px-4 overflow-hidden">
                 <ul
@@ -85,11 +79,18 @@ export function Chat() {
                             <div
                                 className={`p-4 rounded-xl shadow-md max-w-[75%] ${
                                     m.role === "user"
-                                        ? "bg-purple-500 text-white"
+                                        ? "bg-[#0047AB] text-white"
                                         : "bg-white text-gray-900"
                                 }`}
                             >
-                                <p>{m.content}</p>
+                                <p>
+                                    {m.content.split('\n').map((line, i) => (
+                                        <span key={i}>
+                                            {line}
+                                            <br />
+                                        </span>
+                                    ))}
+                                </p>
                             </div>
                         </li>
                     ))}
@@ -109,7 +110,7 @@ export function Chat() {
                         value={input}
                         onChange={handleInputChange}
                     />
-                    <Button className="ml-2 bg-purple-500 text-white px-4 py-2 rounded-lg">
+                    <Button className="ml-2 bg-[#0047AB] text-white px-4 py-2 rounded-lg">
                         Send
                     </Button>
                 </form>
