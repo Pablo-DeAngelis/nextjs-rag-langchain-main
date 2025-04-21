@@ -22,21 +22,24 @@ export async function POST(req: Request) {
         console.log("Received Token:", token);
 
         const TEMPLATE = `
-You are a fitness coach collecting information to create a personalized training routine. Ask the following questions one by one, waiting for the user's answer before proceeding:
+You are CoachConnect: a warm, motivating, and expert-level AI fitness coach. Guide the user through the following onboarding questions one at a time. Always wait for the user to answer before asking the next. Keep your tone friendly and supportive, like a real personal coach. Don't dump multiple questions at once. Respond with one question per message:
+Ask the questions in this exact order, and make sure to always include the final question "Any other preferences or things you'd like me to consider? (e.g., target areas, rest days, training style)" — do NOT SKIP it under any circumstances.
 
-What's your main training goal?
-Do you train for a specific sport? (If not, general fitness is fine.)
-What equipment do you have access to? (If you just go to the gym, input gym. If you train outside the gym or home gym as well, list the equipment you have e.g. dumbbells, rope, agility ladder.)
-What type of training do you want to focus on? (Strength, Conditioning, Speed, Hypertrophy, etc.)
-How many days per week will you train?
-How many of those days will be gym/home gym workouts? 
-How many days will be sport-specific training? (If none, type 0.)
-How long should each session be? (in minutes)
-Any past or current injuries?
-Any other preferences for your routine? (e.g., muscle groups, workout type, etc.)
 
-Once all answers are collected, respond with:  
-"Thank you! We’re generating your workout routine."  
+What’s your main training goal? 
+Are you training for a specific sport? (If not, general fitness is totally fine!)
+Where do you train? (e.g., Gym, Home, Pitch, list all that apply) 
+What equipment do you have available? (If you just go to the gym, input gym. If you train outside the gym as well, list the equipment you have e.g. dumbbells, rope, agility ladder.)
+What kind of training do you enjoy or want to focus on? (e.g., Strength, Conditioning, Speed, Mobility)
+How many days per week do you want to train?
+Of those, how many will be gym/home gym workouts? 
+How many will be sport-specific sessions? (If none, just say 0.)
+How long should each workout session be? (in minutes)
+Do you have any past or current injuries I should know about?
+Any other preferences or things you'd like me to consider? (e.g., target areas, rest days, training style)
+
+After the last answer, respond with:
+"Awesome! Thanks for sharing all that. I’m now building your personalized workout routine — just a moment..."
 
 Current conversation:  
 {chat_history}  
@@ -79,19 +82,28 @@ assistant:
             stream.pipeThrough(createStreamDataTransformer()),
         );
 
-        const uniqueQAHistory = qaHistory.filter((value, index, self) =>
-            index === self.findIndex((t) =>
-                t.question === value.question && t.answer === value.answer
-            )
-        );
-
-        const uniqueQAHistoryJson = JSON.stringify(uniqueQAHistory, null, 2);
-        console.log("QA History:\n", uniqueQAHistoryJson);
+function removeEmojis(text) {
+    return text.replace(/[^\x00-\x7F]/g, '');
+  }
+  
+  const cleanedQAHistory = qaHistory.map(({ question, answer }) => ({
+    question: removeEmojis(question),
+    answer: removeEmojis(answer),
+  }));
+  
+  const uniqueQAHistory = cleanedQAHistory.filter((value, index, self) =>
+    index === self.findIndex((t) =>
+      t.question === value.question && t.answer === value.answer
+    )
+  );
+  
+  const uniqueQAHistoryJson = JSON.stringify(uniqueQAHistory, null, 2);
+  console.log("QA History:\n", uniqueQAHistoryJson);
 
         if (
             formattedPreviousMessages.includes("And lastly") ||
-            formattedPreviousMessages.includes("preferences for your routine") ||
-            formattedPreviousMessages.includes("e.g., muscle groups, workout type, etc.") ||
+            formattedPreviousMessages.includes("Any other preferences or things you'd like me to consider") ||
+            formattedPreviousMessages.includes("e.g., target areas, rest days, training style") ||
             formattedPreviousMessages.includes("por ultimo")
         ) {
             // Ejecutar POST en segundo plano sin bloquear la respuesta
