@@ -17,11 +17,13 @@ const formatMessage = (message: VercelChatMessage) => {
 };
 
 export async function POST(req: Request) {
+    console.log(">>> Nueva solicitud POST recibida por CoachConnect");
+    
     try {
         const token = req.headers.get('Authorization')?.replace('Bearer ', '');
-        console.log("Received Token:", token);
+        console.log("✅ Token recibido:", token);
 
-const TEMPLATE = `
+        const TEMPLATE = `
 You are CoachConnect: a warm, motivating, and expert-level AI fitness coach. Guide the user through the following onboarding questions one at a time. Always wait for the user to answer before asking the next. Keep your tone friendly and supportive, like a real personal coach. Don't dump multiple questions at once. Respond with one question per message.
 
 Ask the questions in this exact order. Do NOT skip or modify the following two questions under any circumstances:
@@ -87,53 +89,64 @@ assistant:
             stream.pipeThrough(createStreamDataTransformer()),
         );
 
-const removeEmojis = (text: string) => {
-    return text.replace(/[^\x00-\x7F]/g, '');
-};
-  
-  const cleanedQAHistory = qaHistory.map(({ question, answer }) => ({
-    question: removeEmojis(question),
-    answer: removeEmojis(answer),
-  }));
-  
-  const uniqueQAHistory = cleanedQAHistory.filter((value, index, self) =>
-    index === self.findIndex((t) =>
-      t.question === value.question && t.answer === value.answer
-    )
-  );
-  
-  const uniqueQAHistoryJson = JSON.stringify(uniqueQAHistory, null, 2);
-  console.log("QA History:\n", uniqueQAHistoryJson);
+        const removeEmojis = (text: string) => {
+            return text.replace(/[^\x00-\x7F]/g, '');
+        };
 
-        if (
+        const cleanedQAHistory = qaHistory.map(({ question, answer }) => ({
+            question: removeEmojis(question),
+            answer: removeEmojis(answer),
+        }));
+
+        const uniqueQAHistory = cleanedQAHistory.filter((value, index, self) =>
+            index === self.findIndex((t) =>
+                t.question === value.question && t.answer === value.answer
+            )
+        );
+
+        const uniqueQAHistoryJson = JSON.stringify(uniqueQAHistory, null, 2);
+        console.log("📋 QA History:\n", uniqueQAHistoryJson);
+
+        console.log("🔍 Verificando si se completó el onboarding...");
+        console.log("Últimos mensajes del usuario:\n", formattedPreviousMessages);
+
+        const finalQuestionDetected =
             formattedPreviousMessages.includes("And lastly") ||
             formattedPreviousMessages.includes("Any other preferences or things you'd like me to consider") ||
             formattedPreviousMessages.includes("e.g., target areas, rest days, training style") ||
-            formattedPreviousMessages.includes("por ultimo")
-        ) {
-            // Ejecutar POST en segundo plano sin bloquear la respuesta
-            (async () => {
-                try {
-                    const response = await fetch("https://ia-workout-api.fly.dev/api/answers", {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: uniqueQAHistoryJson
-                    });
+            formattedPreviousMessages.includes("por ultimo");
 
-                    const responseData = await response.json();
-                    console.log("Response from external service:", responseData);
-                } catch (error) {
-                    console.error("Error sending data to external service:", error);
-                }
-            })();
+        if (finalQuestionDetected) {
+    console.log("✅ Onboarding detectado como completo. Procediendo a enviar datos al backend...");
+
+    // Ejecutar POST en segundo plano sin bloquear la respuesta
+    (async () => {
+        try {
+            console.log("📡 Enviando POST a ia-workout-api.fly.dev/api/answers con token:", token);
+            console.log("📦 Payload:\n", uniqueQAHistoryJson);
+
+            const response = await fetch("https://ia-workout-api.fly.dev/api/answers", {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: uniqueQAHistoryJson
+            });
+
+            const responseData = await response.json();
+            console.log("✅ Respuesta del servicio externo:", responseData);
+        } catch (error) {
+            console.error("❌ Error al enviar datos al servicio externo:", error);
         }
-
+    })();
+} else {
+    console.log("🕓 El onboarding aún no está completo. No se dispara el POST.");
+}
         return finalResponse;
 
     } catch (e: any) {
+        console.error("❌ Error general en POST /api/chat:", e);
         return Response.json({ error: e.message }, { status: e.status ?? 500 });
     }
 }

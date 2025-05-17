@@ -79,7 +79,7 @@ export function Chat() {
                             <div
                                 className={`p-4 rounded-xl shadow-md max-w-[75%] ${
                                     m.role === "user"
-                                        ? "bg-[#0047AB] text-white"
+                                        ? "bg-[#3A86FF] text-white"
                                         : "bg-white text-gray-900"
                                 }`}
                             >
@@ -110,7 +110,7 @@ export function Chat() {
                         value={input}
                         onChange={handleInputChange}
                     />
-                    <Button className="ml-2 bg-[#0047AB] text-white px-4 py-2 rounded-lg">
+                    <Button className="ml-2 bg-[#3A86FF] text-white px-4 py-2 rounded-lg">
                         Send
                     </Button>
                 </form>

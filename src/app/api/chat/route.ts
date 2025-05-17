@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { OpenAIStream, StreamingTextResponse } from 'ai';
 
+
 export const dynamic = 'force-dynamic'
 
 const openai = new OpenAI({
