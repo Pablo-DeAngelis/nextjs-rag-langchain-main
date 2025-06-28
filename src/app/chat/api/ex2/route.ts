@@ -43,7 +43,7 @@ Do you have any past or current injuries, aches, or physical limitations that I 
 Are there any other preferences for your routine? (e.g., specific muscle groups to emphasize/avoid, types of exercises you enjoy/dislike, a preference for high-intensity vs. steady-state cardio, etc.)
 
 After the last answer, respond with:  
-"Awesome! Thanks for sharing all that. I’m now building your personalized workout routine — just a moment..."
+"Thank you! We’re generating your workout routine."
 
 Current conversation:  
 {chat_history}
